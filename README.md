@@ -13,6 +13,15 @@ A highly accurate, lightweight, and entirely offline facial recognition and live
 
 ---
 
+## 🌟 Why FaceSeal is Better
+
+*   **Zero-Network Failure:** Traditional cloud APIs (like AWS Rekognition) fail in remote or underground field environments. FaceSeal executes 100% locally, guaranteeing uptime anywhere.
+*   **Built-in Anti-Spoofing:** Basic face detection libraries can be easily fooled by holding a printed photo or iPad to the camera. FaceSeal employs active liveness checks (pixel variance heuristics & physical challenges) to guarantee the presence of a real, 3D human.
+*   **Defeats SDK Bloat:** Standard on-device AI SDKs inflate React Native apps by 50MB–100MB. Through aggressive C++ `.so` compression and ABI splitting, FaceSeal delivers full ML capabilities in under `16 MB`.
+*   **Data Privacy & Compliance:** Biometric verification happens entirely on-device. Logs are cached locally and instantly purged upon sync, ensuring strict compliance with enterprise and government data privacy standards.
+
+---
+
 ## 🏗 Architecture
 
 ```
