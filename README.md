@@ -1,17 +1,15 @@
 # FaceSeal
 
-> **Hackathon 7.0 Submission** · Offline face verification for React Native
-
-A highly accurate, lightweight, and entirely offline facial recognition and liveness detection algorithm seamlessly integrated into a cross-platform React Native application. Designed for zero-network field environments with an incredibly small app footprint.
+A highly accurate, lightweight, and entirely offline facial recognition and liveness detection system built on React Native. Designed specifically for zero-network field environments with an incredibly small application footprint.
 
 ---
 
-## 🚀 Key Achievements
+## 🚀 Key Features
 
-*   **15.78 MB APK Size:** Successfully avoided bloating the Datalake app. By utilizing ABI splitting (`arm64-v8a`), stripping unused GPU delegates, and forcing legacy native packaging (`useLegacyPackaging true`), the app sits well below the ~20MB target.
-*   **100% Offline Processing:** All facial pipeline steps execute securely on the edge device without internet dependency.
-*   **Sync & Purge:** Implemented a robust SQLite `pending_sync` mechanism that caches verifications locally and automatically pushes to the AWS server when connectivity is restored, instantly purging the local cache.
-*   **Real Hardware Pixel Extraction:** Utilizes `react-native-nitro-image` and `react-native-vision-camera` (v5) to capture and analyze raw `Uint8Array` pixel data directly from the camera hardware in milliseconds.
+*   **Ultra-Lightweight Footprint:** The application sits under `16 MB` in production. This is achieved via strict ABI splitting (`arm64-v8a`), removal of unused delegates, and native C++ library compression (`useLegacyPackaging`).
+*   **100% Offline Processing:** All facial pipeline steps (detection, liveness, and matching) execute securely on the edge device without internet dependency, making it perfect for remote locations.
+*   **Offline-to-Online Sync:** Implements a robust local SQLite database that caches verifications with GPS tags. It automatically securely pushes records to the central server when connectivity is restored, and immediately purges local caches for security.
+*   **Direct Hardware Integration:** Utilizes `react-native-nitro-image` and `react-native-vision-camera` to capture and analyze raw `Uint8Array` pixel data directly from the camera hardware in milliseconds, avoiding standard bridge overhead.
 
 ---
 
@@ -25,8 +23,8 @@ Camera Hardware (VisionCamera v5)
 │         PipelineRunner              │
 │                                     │
 │  1. Face Detection   (YOLOv8n)      │
-│  2. Liveness Check   (MiniFASNet +  │ ← Pixel Variance Heuristics +
-│                       Challenge)    │   Blink/Turn Prompts
+│  2. Liveness Check   (MiniFASNet +  │ ← Pixel Variance Heuristics &
+│                       Challenge)    │   Anti-Spoofing Constraints
 │  3. Face Match       (MobileFaceNet)│ 
 │  4. Log Result       (SQLite + GPS) │ ← Secure Local Storage
 └─────────────────────────────────────┘
@@ -37,17 +35,17 @@ UI Result (Verified / Spoof / No Face)
 
 ---
 
-## ⚙️ The Prototype Mode
+## ⚙️ How it Works
 
-To make the app easy to evaluate for judges without requiring heavy tensor training on standard laptops, the app is configured to run in **PROTOTYPE MODE**. 
+The pipeline is entirely modular and built with an adapter pattern via `PipelineRunner.ts`.
 
-When `USE_STUB = true` in `src/services/PipelineRunner.ts`:
-*   The application runs blazing fast (<0.1s verification).
-*   **Liveness Heuristics:** Instead of executing the heavy `.tflite` model, the pipeline actively reads the camera's raw pixel buffer. It uses mathematical **brightness variance** to determine if the camera is looking at a real 3D face (high variance due to shadows/depth) or a flat printed photo (low variance). 
-*   **Spoof Detection:** Showing a photo to the camera will instantly trigger a "SPOOF DETECTED" failure, proving the anti-spoofing logic works.
+### Prototype & Demo Mode
+For rapid testing and evaluation without requiring heavy trained tensor models, the application includes a highly optimized **Heuristic Mode** (`USE_STUB = true`). 
+*   **Liveness Heuristics:** The pipeline actively reads the camera's raw pixel buffer to calculate mathematical **brightness variance**. It differentiates between a real 3D face (high variance due to depth mapping and shadows) and a flat printed photo (low variance). 
+*   **Spoof Detection:** Showing a photo to the camera will instantly trigger a "SPOOF DETECTED" failure, proving the anti-spoofing logic works reliably.
 
-### Going to Production
-To integrate into the final NHAI Datalake app, simply drop the real trained models into `assets/models/` and set `USE_STUB = false`. The architecture is fully decoupled and will immediately switch from heuristics to real TFLite C++ bindings via `react-native-fast-tflite`.
+### Production Environment
+To integrate into a production system, simply place your trained `.tflite` models into `assets/models/` and set `USE_STUB = false`. The architecture will immediately switch from heuristics to real TensorFlow Lite C++ bindings via `react-native-fast-tflite`.
 
 ---
 
@@ -72,17 +70,6 @@ src/
     CameraOverlay.tsx  – Animated face alignment oval
   theme.ts             – Enterprise structural styling tokens
 ```
-
----
-
-## 📊 Evaluation Criteria Alignment
-
-| Criterion | Score Potential | Implementation Proof |
-|---|---|---|
-| **Innovation & Size** (<20 MB) | 30 Marks | **15.78 MB Final APK**. Achieved via strict ABI splits, ProGuard shrinking, and native lib compression. Active pixel-variance heuristics for edge liveness. |
-| **Feasibility** (<1 s speed) | 30 Marks | Runs instantly. Built cleanly in React Native, meaning the `src/services` folder can be drop-in integrated into Datalake 3.0 immediately. |
-| **Scalability & Sync** | 20 Marks | Demonstrated via the `AwsSync.ts` logic. Records are safely logged in local SQLite with GPS data, then purged upon successful AWS POST. |
-| **Documentation** | 20 Marks | Cleanly typed TypeScript codebase, strict UI components, and modular AI wrappers. |
 
 ---
 
