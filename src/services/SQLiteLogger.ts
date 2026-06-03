@@ -15,9 +15,6 @@ export function ensureSchema(): Promise<void> {
   dbReady = new Promise((resolve, reject) => {
     try {
       const db = getDb();
-      // Drop old tables if they exist with wrong schema (migration)
-      db.execute('DROP TABLE IF EXISTS workers;');
-      db.execute('DROP TABLE IF EXISTS verifications;');
       db.execute(`CREATE TABLE IF NOT EXISTS workers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
